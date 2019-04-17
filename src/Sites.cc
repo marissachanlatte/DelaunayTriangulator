@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <array>
 #include <utility>
 
 using namespace std;
@@ -37,4 +38,28 @@ vector<pair<double, double>> Sites::getPositions(){
     positions.push_back(node.getPosition());
   }
   return positions;
+};
+
+vector<Node> Sites::sortNodes(vector<Node> nodes){
+  vector<array<double, 3>>  positions_and_ids;
+  for(auto &node : m_nodes){
+    array<double, 3> pid  = {node.getPosition().first,
+                             node.getPosition().second,
+                             (double) node.getID()};
+    positions_and_ids.push_back(pid);
+  }
+  sort(positions_and_ids.begin(), positions_and_ids.end());
+  vector<Node> sorted_ids;
+  for(auto &ids : positions_and_ids){
+    sorted_ids.push_back(this->findNode(int(ids[2])));
+  }
+  return sorted_ids;
+};
+
+vector<Node> Sites::getNodes(){
+  return m_nodes;
+};
+
+const Node Sites::findNode(const int id){
+  return m_nodes[id];
 };

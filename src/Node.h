@@ -1,6 +1,6 @@
 #ifndef _NODE_H_
 #define _NODE_H_
-#include <utility> 
+#include <utility>
 using namespace std;
 
 class Node{

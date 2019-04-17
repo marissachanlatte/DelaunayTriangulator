@@ -12,9 +12,13 @@ class Sites{
     Sites(const string& nodeFile);
     int numNodes();
     vector<pair<double, double>> getPositions();
+    vector<Node> sortNodes(vector<Node> nodes);
+    vector<Node> getNodes();
+    const Node findNode(const int id);
 
   private:
     unsigned int m_numNodes;
     vector<Node> m_nodes;
+
 };
 #endif

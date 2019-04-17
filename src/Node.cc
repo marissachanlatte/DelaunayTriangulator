@@ -22,6 +22,7 @@ const int& Node::getID() const{
   return m_id;
 };
 
+
 const pair<double, double> Node::getPosition(){
   return m_position;
 };

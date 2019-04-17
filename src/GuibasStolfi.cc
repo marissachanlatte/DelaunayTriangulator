@@ -1,4 +1,5 @@
 #include "GuibasStolfi.h"
+#include "Edge.h"
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -11,6 +12,13 @@ GuibasStolfi::GuibasStolfi(){
 
 GuibasStolfi::GuibasStolfi(Sites sites){
   /// Sort sites lexicographically
-  vector<pair<double, double>> vertices = sites.getPositions();
-  sort(vertices.begin(), vertices.end());
+  vector<Node> nodes = sites.getNodes();
+  vector<Node> vertices = sites.sortNodes(nodes);
+
+  if (vertices.size() == 2){
+    Edge a = Edge(vertices[0], vertices[1]);
+    this->triangles.push_back({vertices[0].getID() + 1,
+                        vertices[1].getID() + 1,
+                        vertices[0].getID() + 1});
+  }
 };

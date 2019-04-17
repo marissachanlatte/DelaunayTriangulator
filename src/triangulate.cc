@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "CLI11.hpp"
 #include "Sites.h"
 #include "GuibasStolfi.h"
@@ -24,13 +25,28 @@ int main(int argc, const char* argv[])
   // Parse Commandline Options
   CLI11_PARSE(app, argc, argv);
 
-  Sites sites;
-  sites = Sites(input_path);
+  Sites sites = Sites(input_path);
 
+  /// Perform triangulation
+  vector<array<int, 3>> triangles;
   if (alg_number == 1){
-    GuibasStolfi triangulation;
-    triangulation = GuibasStolfi(sites);
+    GuibasStolfi triangulation = GuibasStolfi(sites);
+    triangles = triangulation.triangles;
   }
 
+  // /// Write to ele file
+  size_t found = input_path.find_last_of("/\\");
+  string filename = input_path.substr(found + 1);
+  filename.replace(filename.end()-4, filename.end(), "ele");
+
+  ofstream elefile;
+  elefile.open (filename);
+  elefile << triangles.size() << " " << "3" << endl;
+  int tri_id = 0;
+  for(auto &it : triangles){
+    elefile << tri_id << " " << it[0] << " " << it[1] << " " << it[2] << endl;
+    tri_id = tri_id + 1;
+  }
+  elefile.close();
   return 0;
 }
