@@ -1,4 +1,7 @@
+#include <iostream>
 #include "CLI11.hpp"
+#include "Sites.h"
+#include "GuibasStolfi.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -20,6 +23,14 @@ int main(int argc, const char* argv[])
 
   // Parse Commandline Options
   CLI11_PARSE(app, argc, argv);
+
+  Sites sites;
+  sites = Sites(input_path);
+
+  if (alg_number == 1){
+    GuibasStolfi triangulation;
+    triangulation = GuibasStolfi(sites);
+  }
 
   return 0;
 }
