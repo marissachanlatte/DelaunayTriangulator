@@ -9,8 +9,12 @@ SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS := -g # -Wall
 # LIB := -pthread -lmongoclient -L lib -lboost_thread-mt -lboost_filesystem-mt -lboost_system-mt
-LIB := -L lib
+LIB := -L lib build/predicates.o
 INC := -I include
+
+predicates.o: src/predicates.c
+	@mkdir -p $(BUILDDIR)
+	gcc -c src/predicates.c -o build/predicates.o
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
@@ -19,6 +23,7 @@ $(TARGET): $(OBJECTS)
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $<
+
 
 clean:
 	@echo " Cleaning...";

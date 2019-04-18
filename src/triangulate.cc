@@ -25,6 +25,7 @@ int main(int argc, const char* argv[])
   // Parse Commandline Options
   CLI11_PARSE(app, argc, argv);
 
+  exactinit();
   Sites sites = Sites(input_path);
 
   /// Perform triangulation

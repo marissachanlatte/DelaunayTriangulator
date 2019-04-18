@@ -5,6 +5,11 @@
 #include <vector>
 #include <array>
 
+extern "C" {
+  double orient2d(double*, double*, double*);
+  void exactinit();
+};
+
 using namespace std;
 
 class GuibasStolfi{
