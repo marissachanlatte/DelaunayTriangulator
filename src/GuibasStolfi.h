@@ -14,8 +14,9 @@ using namespace std;
 
 class GuibasStolfi{
   public:
-    GuibasStolfi();
     GuibasStolfi(Sites sites);
+    array<Edge*, 2> Delaunay(Sites sites);
+    void computeTriangles(Edge* le, Edge* re);
     /// The triangles produced by the GS algorithm
     vector<array<int, 3>> triangles;
 };

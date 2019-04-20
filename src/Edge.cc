@@ -1,20 +1,9 @@
 #include "Edge.h"
 #include "QuadEdge.h"
+#include <iostream>
+#include <assert.h>
 
 using namespace std;
-
-/// Empty edge starting and ending at infinity
-Edge::Edge(){
-  m_origin = new Node();
-  m_destination = new Node();
-};
-
-
-Edge::Edge(Node *org, Node *dest){
-  m_origin = org;
-  m_destination = dest;
-};
-
 
 Edge* Edge::makeEdge(){
   return (new QuadEdge())->edges;
@@ -46,11 +35,13 @@ Edge* Edge::rot(){
 
 
 Edge* Edge::rotInv(){
-  if(m_index < 3){
-    return this+3;
+  assert (m_index >= 0);
+  assert (m_index <= 3);
+  if(m_index > 0){
+    return this-1;
   }
   else{
-    return this-1;
+    return this+3;
   }
 };
 
@@ -72,20 +63,20 @@ Node* Edge::org(){
 
 
 void Edge::setOrg(Node *org){
-  org->addEdge(this);
   m_origin = org;
+  org->addEdge(this);
 };
 
 
 
 Node* Edge::dest(){
-  return m_destination;
+  return this->sym()->org();
 };
 
 
 void Edge::setDest(Node *dest){
+  this->sym()->setOrg(dest);
   dest->addEdge(this->sym());
-  m_destination = dest;
 };
 
 
@@ -101,7 +92,7 @@ Edge* Edge::Lnext(){
 Edge* Edge::connect(Edge *b){
   Edge* e;
   e = e->makeEdge();
-  e->setOrg(m_destination);
+  e->setOrg(this->dest());
   e->setDest(b->org());
   e->splice(this->Lnext());
   e->sym()->splice(b);
@@ -113,8 +104,25 @@ void Edge::splice(Edge *b){
   Edge* alpha = this->Onext()->rot();
   Edge* beta = b->Onext()->rot();
 
-  this->setNext(b->Onext());
-  b->setNext(this->Onext());
-  alpha->setNext(beta->Onext());
-  beta->setNext(alpha->Onext());
+  /// Interchange a & b and alpha & beta
+  Edge* tmp1 = b->Onext();
+  Edge* tmp2 = this->Onext();
+  Edge* tmp3 = beta->Onext();
+  Edge* tmp4 = alpha->Onext();
+
+  this->setNext(tmp1);
+  b->setNext(tmp2);
+  alpha->setNext(tmp3);
+  beta->setNext(tmp4);
 };
+
+
+unsigned int Edge::getID(){
+  return m_id;
+};
+
+void Edge::setID(unsigned int id){
+  m_id = id;
+};
+
+unsigned int Edge::lastID = -1;

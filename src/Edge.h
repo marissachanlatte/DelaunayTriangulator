@@ -8,12 +8,12 @@ class Node;
 
 class Edge{
   public:
-    Edge();
-    Edge(Node *org, Node *dest);
-    Edge* makeEdge();
+    static Edge* makeEdge();
     void setNext(Edge *next);
     void setIndex(unsigned int index);
+    void setID(unsigned int id);
     unsigned int getIndex();
+    unsigned int getID();
     Node* org();
     Node* dest();
     void setOrg(Node *org);
@@ -25,11 +25,12 @@ class Edge{
     Edge* sym();
     void splice(Edge *b);
     Edge* connect(Edge *b);
+    /// last global edge id used
+    static unsigned int lastID;
   private:
     Node *m_origin;
-    Node *m_destination;
     Edge *m_next;
     unsigned int m_index;
-
+    unsigned int m_id;
 };
 #endif

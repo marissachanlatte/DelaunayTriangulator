@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
   ofstream elefile;
   elefile.open (filename);
   elefile << triangles.size() << " " << "3" << endl;
-  int tri_id = 0;
+  int tri_id = 1;
   for(auto &it : triangles){
     elefile << tri_id << " " << it[0] << " " << it[1] << " " << it[2] << endl;
     tri_id = tri_id + 1;

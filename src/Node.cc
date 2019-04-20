@@ -7,8 +7,8 @@
 using namespace std;
 
 Node::Node(){
-  m_position.first = DBL_MAX;
-  m_position.second = DBL_MAX;
+  m_position.first = numeric_limits<double>::infinity();
+  m_position.second = numeric_limits<double>::infinity();
 };
 
 
