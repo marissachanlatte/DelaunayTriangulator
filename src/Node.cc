@@ -26,3 +26,7 @@ const int& Node::getID() const{
 const pair<double, double> Node::getPosition(){
   return m_position;
 };
+
+void Node::addEdge(Edge *edge){
+  m_edge = edge;
+};

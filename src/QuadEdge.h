@@ -6,5 +6,5 @@ using namespace std;
 class QuadEdge{
   public:
     QuadEdge();
-    array<Edge, 4> edges;
+    Edge edges[4];
 };

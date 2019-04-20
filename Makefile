@@ -12,9 +12,9 @@ CFLAGS := -g # -Wall
 LIB := -L lib build/predicates.o
 INC := -I include
 
-predicates.o: src/predicates.c
-	@mkdir -p $(BUILDDIR)
-	gcc -c src/predicates.c -o build/predicates.o
+# predicates.o: src/predicates.c
+# 	@mkdir -p $(BUILDDIR)
+
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
@@ -23,6 +23,7 @@ $(TARGET): $(OBJECTS)
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $<
+	gcc -c src/predicates.c -o build/predicates.o
 
 
 clean:
