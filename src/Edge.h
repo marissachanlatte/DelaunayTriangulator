@@ -9,6 +9,7 @@ class Node;
 class Edge{
   public:
     static Edge* makeEdge();
+    void deleteEdge();
     void setNext(Edge *next);
     void setIndex(unsigned int index);
     void setID(unsigned int id);
@@ -20,6 +21,8 @@ class Edge{
     void setDest(Node *dest);
     Edge* Onext();
     Edge* Lnext();
+    Edge* Rprev();
+    Edge* Oprev();
     Edge* rot();
     Edge* rotInv();
     Edge* sym();

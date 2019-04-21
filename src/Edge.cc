@@ -10,6 +10,12 @@ Edge* Edge::makeEdge(){
 };
 
 
+void Edge::deleteEdge(){
+  this->splice(this->Oprev());
+  this->sym()->splice(this->sym()->Oprev());
+};
+
+
 void Edge::setNext(Edge *next){
   m_next = next;
 };
@@ -89,9 +95,19 @@ Edge* Edge::Lnext(){
   return this->rotInv()->Onext()->rot();
 }
 
+
+Edge* Edge::Rprev(){
+  return this->sym()->Onext();
+};
+
+
+Edge* Edge::Oprev(){
+  return this->rot()->Onext()->rot();
+};
+
+
 Edge* Edge::connect(Edge *b){
-  Edge* e;
-  e = e->makeEdge();
+  Edge* e = Edge::makeEdge();
   e->setOrg(this->dest());
   e->setDest(b->org());
   e->splice(this->Lnext());

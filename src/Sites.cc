@@ -22,8 +22,8 @@ Sites::Sites(const string& nodeFile){
   m_nodes.resize(m_numNodes);
   for(int i=0; i<ncount; i++){
     int id;
-    pair<double, double> x;
-    nodes>>id>>x.first>>x.second;
+    double x[2];
+    nodes>>id>>x[0]>>x[1];
     m_nodes[id - 1] = new Node(x, id - 1);
   }
 };
@@ -32,8 +32,8 @@ int Sites::numNodes(){
   return m_numNodes;
 };
 
-vector<pair<double, double>> Sites::getPositions(){
-  vector<pair<double, double>>  positions;
+vector<double*> Sites::getPositions(){
+  vector<double*>  positions;
   for(auto &node : m_nodes){
     positions.push_back(node->getPosition());
   }
@@ -43,8 +43,8 @@ vector<pair<double, double>> Sites::getPositions(){
 vector<Node*> Sites::sortNodes(vector<Node*> nodes){
   vector<array<double, 3>>  positions_and_ids;
   for(auto &node : m_nodes){
-    array<double, 3> pid  = {node->getPosition().first,
-                             node->getPosition().second,
+    array<double, 3> pid  = {node->getPosition()[0],
+                             node->getPosition()[1],
                              (double) node->getID()};
     positions_and_ids.push_back(pid);
   }

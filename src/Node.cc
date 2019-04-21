@@ -6,14 +6,9 @@
 
 using namespace std;
 
-Node::Node(){
-  m_position.first = numeric_limits<double>::infinity();
-  m_position.second = numeric_limits<double>::infinity();
-};
-
-
-Node::Node(pair<double, double> position, const int& nodeID){
-  m_position = position;
+Node::Node(double* position, const int& nodeID){
+  m_position[0] = position[0];
+  m_position[1] = position[1];
   m_id = nodeID;
 };
 
@@ -23,7 +18,7 @@ const int& Node::getID() const{
 };
 
 
-const pair<double, double> Node::getPosition(){
+double* Node::getPosition(){
   return m_position;
 };
 

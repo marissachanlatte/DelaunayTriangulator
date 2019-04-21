@@ -5,11 +5,16 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <stdlib.h>
 
 using namespace std;
 
 GuibasStolfi::GuibasStolfi(Sites sites){
-  array<Edge*, 2> edges = Delaunay(sites);
+  vector<Node*> nodes = sites.getNodes();
+  /// Sort Lexicographically
+  vector<Node*> vertices = sites.sortNodes(nodes);
+  array<Edge*, 2> edges = Delaunay(vertices);
+
   computeTriangles(edges[0], edges[1]);
 };
 
@@ -58,15 +63,11 @@ void GuibasStolfi::computeTriangles(Edge* le, Edge* re){
   }
 };
 
-array<Edge*, 2> GuibasStolfi::Delaunay(Sites sites){
-  /// Sort sites lexicographically
-  vector<Node*> nodes = sites.getNodes();
-  vector<Node*> vertices = sites.sortNodes(nodes);
+array<Edge*, 2> GuibasStolfi::Delaunay(vector<Node*> vertices){
   array<Edge*, 2> edges;
 
   if (vertices.size() == 2){
-    QuadEdge qa;
-    Edge* a = qa.edges;
+    Edge* a = Edge::makeEdge();
     a->setOrg(vertices[0]);
     a->setDest(vertices[1]);
 
@@ -84,24 +85,115 @@ array<Edge*, 2> GuibasStolfi::Delaunay(Sites sites){
     b->setOrg(vertices[1]);
     b->setDest(vertices[2]);
 
-    Edge* c = b->connect(a);
-    /// CCW Test
-    double s1[2] = {vertices[0]->getPosition().first,
-                 vertices[0]->getPosition().second};
-    double s2[2] = {vertices[1]->getPosition().first,
-                 vertices[1]->getPosition().second};
-    double s3[2] = {vertices[2]->getPosition().first,
-                 vertices[2]->getPosition().second};
-    double ccw = orient2d(s1, s2, s3);
 
-    if (ccw >= 0){
+    /// CCW Test
+    double ccw = orient2d(vertices[0]->getPosition(),
+                          vertices[1]->getPosition(),
+                          vertices[2]->getPosition());
+
+    if (ccw > 0){
+      b->connect(a);
       edges[0] = a;
       edges[1] = b->sym();
     }
-    else{
+    else if (ccw < 0){
+      Edge* c = b->connect(a);
       edges[0] = c->sym();
       edges[1] = c;
     }
+    else{
+      edges[0] = a;
+      edges[1] = b->sym();
+    }
+  }
+  else{
+    vector<Node*> left_half(vertices.begin(),
+                            vertices.begin() + vertices.size() / 2);
+    vector<Node*> right_half(vertices.begin() + vertices.size() / 2,
+                             vertices.end());
+
+    array<Edge*, 2> leftD = Delaunay(left_half);
+    array<Edge*, 2> rightD = Delaunay(right_half);
+
+    Edge* ldo = leftD[0];
+    Edge* ldi = leftD[1];
+    Edge* rdi = rightD[0];
+    Edge* rdo = rightD[1];
+
+    /// Compute the lower common tangent of leftD and rightD
+    while (true){
+      if (orient2d(rdi->org()->getPosition(),
+                   ldi->org()->getPosition(),
+                   ldi->dest()->getPosition()) > 0){ldi = ldi->Lnext();}
+      else if (orient2d(ldi->org()->getPosition(),
+                        rdi->dest()->getPosition(),
+                        rdi->org()->getPosition()) > 0){rdi = rdi->Rprev();}
+      else{break;}
+
+    }
+    /// Create a first cross edge basel from rdi.org to ldi.org
+    Edge* basel = rdi->sym()->connect(ldi);
+    if (ldi->org() == ldo->org()){
+      ldo = basel->sym();
+    }
+    if (rdi->org() == rdo->org()){
+      rdo = basel;
+    }
+    /// Merge loop
+    while (true){
+      /// Locate the first L point to be encountered by the rising bubble
+      /// and delete L edges out of basel.dest() that fail the circle test
+      Edge* lcand = basel->sym()->Onext();
+      if (valid(lcand, basel)){
+        while(incircle(basel->dest()->getPosition(),
+                       basel->org()->getPosition(),
+                       lcand->dest()->getPosition(),
+                       lcand->Onext()->dest()->getPosition()) > 0){
+                         Edge* tmp = lcand->Onext();
+                         lcand->deleteEdge();
+                         lcand = tmp;
+                        }
+                     }
+      /// Symmetrically locate the first R point to be hit, and delete R edges
+      Edge* rcand = basel->Oprev();
+      if (valid(rcand, basel)){
+        while(incircle(basel->dest()->getPosition(),
+                       basel->org()->getPosition(),
+                       rcand->dest()->getPosition(),
+                       rcand->Oprev()->dest()->getPosition()) > 0){
+                         Edge* tmp = rcand->Oprev();
+                         rcand->deleteEdge();
+                         rcand = tmp;
+                        }
+                    }
+      /// If both lcand and r cand are invalid then basel is upper common tangent
+      if ((!valid(lcand, basel)) && (!valid(rcand, basel))){
+        break;
+      }
+      /// The next cross edge is to be connected to either lcand.dest or rcand.dest
+      /// if both are valid, then choose appropriate one via incircle test.
+      if (!valid(lcand, basel) ||
+          (valid(rcand, basel) && (incircle(lcand->dest()->getPosition(),
+                                           lcand->org()->getPosition(),
+                                           rcand->org()->getPosition(),
+                                           rcand->dest()->getPosition()) > 0))){
+                                             /// Add cross edge basel from
+                                             /// rcand.dest to basel.dest
+                                             basel = rcand->connect(basel->sym());
+                                           }
+      else{
+        /// Add cross edge basel from basel.org to lcand.dest
+        basel = basel->sym()->connect(lcand->sym());
+      }
+    }
+    edges[0] = ldo;
+    edges[1] = rdo;
   }
   return edges;
+};
+
+bool GuibasStolfi::valid(Edge* edge, Edge* basel){
+  return (orient2d(edge->dest()->getPosition(),
+                  basel->dest()->getPosition(),
+                  basel->org()->getPosition()) > 0);
 };
