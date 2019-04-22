@@ -2,7 +2,7 @@
 #include <string>
 #include "CLI11.hpp"
 #include "Sites.h"
-#include "GuibasStolfi.h"
+#include "Triangulator.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -17,7 +17,7 @@ int main(int argc, const char* argv[])
 
   int alg_number;
   CLI::Option* alg_option = app.add_option("--alg", alg_number,
-                                           "Algorithm number. 1 for Guibas-Stolfi, 2 for alternation.");
+                                           "Algorithm number. 1 for vertical, 2 for alternation.");
 
   alg_option->required();
   alg_option->check(CLI::Range(1, 2));
@@ -29,11 +29,8 @@ int main(int argc, const char* argv[])
   Sites sites = Sites(input_path);
 
   /// Perform triangulation
-  vector<array<int, 3>> triangles;
-  if (alg_number == 1){
-    GuibasStolfi triangulation = GuibasStolfi(sites);
-    triangles = triangulation.triangles;
-  }
+  Triangulator triangulation = Triangulator(sites, alg_number);
+  vector<array<int, 3>>  triangles = triangulation.triangles;
 
   // /// Write to ele file
   size_t found = input_path.find_last_of("/\\");

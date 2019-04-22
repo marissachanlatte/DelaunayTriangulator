@@ -1,4 +1,4 @@
-#include "GuibasStolfi.h"
+#include "Triangulator.h"
 #include "Edge.h"
 #include "QuadEdge.h"
 #include <iostream>
@@ -9,16 +9,22 @@
 
 using namespace std;
 
-GuibasStolfi::GuibasStolfi(Sites sites){
+Triangulator::Triangulator(Sites sites, unsigned int alg_number){
+
   vector<Node*> nodes = sites.getNodes();
   /// Sort Lexicographically
   vector<Node*> vertices = sites.sortNodes(nodes);
-  array<Edge*, 2> edges = Delaunay(vertices);
-
+  array<Edge*, 2> edges;
+  if (alg_number == 1){
+    edges = verticalCuts(vertices);
+  }
+  else if (alg_number == 2){
+    cout << "not implemented" << endl;
+  }
   computeTriangles(edges[0], edges[1]);
 };
 
-void GuibasStolfi::computeTriangles(Edge* le, Edge* re){
+void Triangulator::computeTriangles(Edge* le, Edge* re){
   vector<Edge*> stack;
   vector<vector<Edge*>> visited;
 
@@ -63,7 +69,8 @@ void GuibasStolfi::computeTriangles(Edge* le, Edge* re){
   }
 };
 
-array<Edge*, 2> GuibasStolfi::Delaunay(vector<Node*> vertices){
+
+array<Edge*, 2> Triangulator::verticalCuts(vector<Node*> vertices){
   array<Edge*, 2> edges;
 
   if (vertices.size() == 2){
@@ -107,13 +114,14 @@ array<Edge*, 2> GuibasStolfi::Delaunay(vector<Node*> vertices){
     }
   }
   else{
+    /// Split in half with vertical cut
     vector<Node*> left_half(vertices.begin(),
                             vertices.begin() + vertices.size() / 2);
     vector<Node*> right_half(vertices.begin() + vertices.size() / 2,
                              vertices.end());
 
-    array<Edge*, 2> leftD = Delaunay(left_half);
-    array<Edge*, 2> rightD = Delaunay(right_half);
+    array<Edge*, 2> leftD = verticalCuts(left_half);
+    array<Edge*, 2> rightD = verticalCuts(right_half);
 
     Edge* ldo = leftD[0];
     Edge* ldi = leftD[1];
@@ -139,61 +147,66 @@ array<Edge*, 2> GuibasStolfi::Delaunay(vector<Node*> vertices){
     if (rdi->org() == rdo->org()){
       rdo = basel;
     }
-    /// Merge loop
-    while (true){
-      /// Locate the first L point to be encountered by the rising bubble
-      /// and delete L edges out of basel.dest() that fail the circle test
-      Edge* lcand = basel->sym()->Onext();
-      if (valid(lcand, basel)){
-        while(incircle(basel->dest()->getPosition(),
-                       basel->org()->getPosition(),
-                       lcand->dest()->getPosition(),
-                       lcand->Onext()->dest()->getPosition()) > 0){
-                         Edge* tmp = lcand->Onext();
-                         lcand->deleteEdge();
-                         lcand = tmp;
-                        }
-                     }
-      /// Symmetrically locate the first R point to be hit, and delete R edges
-      Edge* rcand = basel->Oprev();
-      if (valid(rcand, basel)){
-        while(incircle(basel->dest()->getPosition(),
-                       basel->org()->getPosition(),
-                       rcand->dest()->getPosition(),
-                       rcand->Oprev()->dest()->getPosition()) > 0){
-                         Edge* tmp = rcand->Oprev();
-                         rcand->deleteEdge();
-                         rcand = tmp;
-                        }
-                    }
-      /// If both lcand and r cand are invalid then basel is upper common tangent
-      if ((!valid(lcand, basel)) && (!valid(rcand, basel))){
-        break;
-      }
-      /// The next cross edge is to be connected to either lcand.dest or rcand.dest
-      /// if both are valid, then choose appropriate one via incircle test.
-      if (!valid(lcand, basel) ||
-          (valid(rcand, basel) && (incircle(lcand->dest()->getPosition(),
-                                           lcand->org()->getPosition(),
-                                           rcand->org()->getPosition(),
-                                           rcand->dest()->getPosition()) > 0))){
-                                             /// Add cross edge basel from
-                                             /// rcand.dest to basel.dest
-                                             basel = rcand->connect(basel->sym());
-                                           }
-      else{
-        /// Add cross edge basel from basel.org to lcand.dest
-        basel = basel->sym()->connect(lcand->sym());
-      }
-    }
+    basel = mergeLoop(basel);
     edges[0] = ldo;
     edges[1] = rdo;
   }
   return edges;
 };
 
-bool GuibasStolfi::valid(Edge* edge, Edge* basel){
+bool Triangulator::valid(Edge* edge, Edge* basel){
   return (orient2d(edge->dest()->getPosition(),
                   basel->dest()->getPosition(),
                   basel->org()->getPosition()) > 0);
+};
+
+Edge* Triangulator::mergeLoop(Edge* basel){
+  /// Merge loop
+  while (true){
+    /// Locate the first L point to be encountered by the rising bubble
+    /// and delete L edges out of basel.dest() that fail the circle test
+    Edge* lcand = basel->sym()->Onext();
+    if (valid(lcand, basel)){
+      while(incircle(basel->dest()->getPosition(),
+                     basel->org()->getPosition(),
+                     lcand->dest()->getPosition(),
+                     lcand->Onext()->dest()->getPosition()) > 0){
+                       Edge* tmp = lcand->Onext();
+                       lcand->deleteEdge();
+                       lcand = tmp;
+                      }
+                   }
+    /// Symmetrically locate the first R point to be hit, and delete R edges
+    Edge* rcand = basel->Oprev();
+    if (valid(rcand, basel)){
+      while(incircle(basel->dest()->getPosition(),
+                     basel->org()->getPosition(),
+                     rcand->dest()->getPosition(),
+                     rcand->Oprev()->dest()->getPosition()) > 0){
+                       Edge* tmp = rcand->Oprev();
+                       rcand->deleteEdge();
+                       rcand = tmp;
+                      }
+                  }
+    /// If both lcand and r cand are invalid then basel is upper common tangent
+    if ((!valid(lcand, basel)) && (!valid(rcand, basel))){
+      break;
+    }
+    /// The next cross edge is to be connected to either lcand.dest or rcand.dest
+    /// if both are valid, then choose appropriate one via incircle test.
+    if (!valid(lcand, basel) ||
+        (valid(rcand, basel) && (incircle(lcand->dest()->getPosition(),
+                                         lcand->org()->getPosition(),
+                                         rcand->org()->getPosition(),
+                                         rcand->dest()->getPosition()) > 0))){
+                                           /// Add cross edge basel from
+                                           /// rcand.dest to basel.dest
+                                           basel = rcand->connect(basel->sym());
+                                         }
+    else{
+      /// Add cross edge basel from basel.org to lcand.dest
+      basel = basel->sym()->connect(lcand->sym());
+    }
+  }
+  return basel;
 };

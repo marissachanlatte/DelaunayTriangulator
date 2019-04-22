@@ -1,5 +1,5 @@
-#ifndef _GUIBASSTOLFI_H_
-#define _GUIBASSTOLFI_H_
+#ifndef _TRIANGULATOR_H_
+#define _TRIANGULATOR_H_
 
 #include "Sites.h"
 #include <vector>
@@ -13,10 +13,11 @@ extern "C" {
 
 using namespace std;
 
-class GuibasStolfi{
+class Triangulator{
   public:
-    GuibasStolfi(Sites sites);
-    array<Edge*, 2> Delaunay(vector<Node*> nodes);
+    Triangulator(Sites sites, unsigned int alg_number);
+    array<Edge*, 2> verticalCuts(vector<Node*> nodes);
+    Edge* mergeLoop(Edge* basel);
     void computeTriangles(Edge* le, Edge* re);
     bool valid(Edge* edge, Edge* basel);
     /// The triangles produced by the GS algorithm
