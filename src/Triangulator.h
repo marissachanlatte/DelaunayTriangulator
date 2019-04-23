@@ -15,12 +15,16 @@ using namespace std;
 
 class Triangulator{
   public:
-    Triangulator(Sites sites, unsigned int alg_number);
+    Triangulator(Sites problem_sites, unsigned int alg_number);
     array<Edge*, 2> verticalCuts(vector<Node*> nodes);
+    array<Edge*, 4> alternatingCuts(vector<Node*> vertices, bool vertical_flag);
     Edge* mergeLoop(Edge* basel);
-    void computeTriangles(Edge* le, Edge* re);
+    void computeTriangles(Edge* le);
     bool valid(Edge* edge, Edge* basel);
-    /// The triangles produced by the GS algorithm
+    Node* kthSmallest(vector<Node*> &arr, int l, int r, int k, bool (*less_than)(Node*,Node*));
+    int partition(vector<Node*> &arr, int l, int r, bool (*less_than)(Node*,Node*));
+    // Node* qselect(vector<Node*> pArray, int k, int li, int hi, bool vertical_flag);
     vector<array<int, 3>> triangles;
+    Sites sites;
 };
 #endif

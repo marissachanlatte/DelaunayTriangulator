@@ -42,7 +42,7 @@ vector<double*> Sites::getPositions(){
 
 vector<Node*> Sites::sortNodes(vector<Node*> nodes){
   vector<array<double, 3>>  positions_and_ids;
-  for(auto &node : m_nodes){
+  for(auto &node : nodes){
     array<double, 3> pid  = {node->getPosition()[0],
                              node->getPosition()[1],
                              (double) node->getID()};
