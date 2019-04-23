@@ -11,8 +11,8 @@ class Sites{
     /// Constructor by reading from file
     Sites(const string& nodeFile);
     int numNodes();
-    vector<double*> getPositions();
-    vector<Node*> sortNodes(vector<Node*> nodes);
+    vector<double*> getPositions(bool vertical);
+    // vector<Node*> sortNodes(vector<Node*> nodes);
     vector<Node*> getNodes();
     Node* findNode(const int id);
 

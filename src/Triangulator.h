@@ -16,11 +16,10 @@ using namespace std;
 class Triangulator{
   public:
     Triangulator(Sites problem_sites, unsigned int alg_number);
-    array<Edge*, 2> verticalCuts(vector<Node*> nodes);
-    array<Edge*, 4> alternatingCuts(vector<Node*> vertices, bool vertical_flag);
-    Edge* mergeLoop(Edge* basel);
+    array<Edge*, 2> verticalCuts(vector<Node*> nodes, bool vertical);
+    Edge* mergeLoop(Edge* basel, bool vertical);
     void computeTriangles(Edge* le);
-    bool valid(Edge* edge, Edge* basel);
+    bool valid(Edge* edge, Edge* basel, bool vertical);
     Node* kthSmallest(vector<Node*> &arr, int l, int r, int k, bool (*less_than)(Node*,Node*));
     int partition(vector<Node*> &arr, int l, int r, bool (*less_than)(Node*,Node*));
     // Node* qselect(vector<Node*> pArray, int k, int li, int hi, bool vertical_flag);
