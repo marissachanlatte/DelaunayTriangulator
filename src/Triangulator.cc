@@ -23,11 +23,11 @@ bool less_than_yx(Node* x, Node* y){
   return point1 <= point2;
 }
 
-bool less_than_flipped(Node* x, Node* y){
-  array<double, 2> point1 = {x->getPosition(true)[1], -(x->getPosition(true)[0])};
-  array<double, 2> point2 = {y->getPosition(true)[1], -(y->getPosition(true)[0])};
-  return point1 <= point2;
-}
+// bool less_than_flipped(Node* x, Node* y){
+//   array<double, 2> point1 = {x->getPosition(true)[1], -(x->getPosition(true)[0])};
+//   array<double, 2> point2 = {y->getPosition(true)[1], -(y->getPosition(true)[0])};
+//   return point1 <= point2;
+// }
 
 Triangulator::Triangulator(Sites problem_sites, unsigned int alg_number){
   sites = problem_sites;
@@ -45,38 +45,38 @@ Triangulator::Triangulator(Sites problem_sites, unsigned int alg_number){
 };
 
 void compute_state(array<Edge*, 2> leftD, array<Edge*, 2> rightD, bool vertical,
-  Edge* &ldo, Edge* &rdo, Edge* &basel, bool first_run
-){
-  ldo = leftD[0];
-  Edge* ldi = leftD[1];
-  Edge* rdi = rightD[0];
-  rdo = rightD[1];
+  Edge* &ldo, Edge* &rdo, Edge* &basel){
+    ldo = leftD[0];
+    Edge* ldi = leftD[1];
+    Edge* rdi = rightD[0];
+    rdo = rightD[1];
 
-  /// Compute the lower common tangent of leftD and rightD
-  while (true){
-    if (orient2d(rdi->org()->getPosition(vertical),
-                 ldi->org()->getPosition(vertical),
-                 ldi->dest()->getPosition(vertical)) > 0){ldi = ldi->Lnext();}
-    else if (orient2d(ldi->org()->getPosition(vertical),
-                      rdi->dest()->getPosition(vertical),
-                      rdi->org()->getPosition(vertical)) > 0){rdi = rdi->Rprev();}
-    else{break;}
+    /// Compute the lower common tangent of leftD and rightD
+    while (true){
+      if (orient2d(rdi->org()->getPosition(vertical),
+                   ldi->org()->getPosition(vertical),
+                   ldi->dest()->getPosition(vertical)) > 0){ldi = ldi->Lnext();}
+      else if (orient2d(ldi->org()->getPosition(vertical),
+                        rdi->dest()->getPosition(vertical),
+                        rdi->org()->getPosition(vertical)) > 0){rdi = rdi->Rprev();}
+      else{break;}
 
-  }
+    }
 
-  basel = first_run ? rdi->sym()->connect(ldi) : rdi;
-  /// Create a first cross edge basel from rdi.org to ldi.org
-  if (ldi->org() == ldo->org()){
-    ldo = basel->sym();
-  }
-  if (rdi->org() == rdo->org()){
-    rdo = basel;
-  }
+    basel = rdi->sym()->connect(ldi);
+    /// Create a first cross edge basel from rdi.org to ldi.org
+    if (ldi->org() == ldo->org()){
+      ldo = basel->sym();
+    }
+    if (rdi->org() == rdo->org()){
+      rdo = basel;
+    }
 }
+
+
 void Triangulator::baseCases(vector<Node*> &vertices,
                              bool vertical,
-                             array<Edge*, 2> &edges,
-                             bool first_run){
+                             array<Edge*, 2> &edges){
   vertices = sites.sortNodes(vertices, vertical);
   if (vertices.size() == 2){
     Edge* a = Edge::makeEdge();
@@ -103,14 +103,14 @@ void Triangulator::baseCases(vector<Node*> &vertices,
                           vertices[2]->getPosition(vertical));
 
     if (ccw > 0){
-      if (first_run){b->connect(a);}
+      b->connect(a);
       edges[0] = a;
       edges[1] = b->sym();
     }
     else if (ccw < 0){
-      if (first_run){b->connect(a);}
-      edges[0] = a->Onext();
-      edges[1] = a->Onext()->sym();
+      Edge* c = b->connect(a);
+      edges[0] = c->sym();
+      edges[1] = c;
     }
     else{
       edges[0] = a;
@@ -167,7 +167,7 @@ void Triangulator::computeTriangles(Edge* le){
 array<Edge*, 2> Triangulator::verticalCuts(vector<Node*> vertices, bool vertical){
   array<Edge*, 2> edges;
   if (vertices.size() <= 3){
-    baseCases(vertices, vertical, edges, true);
+    baseCases(vertices, vertical, edges);
   }
   else{
     /// Split in half with vertical cut
@@ -182,7 +182,7 @@ array<Edge*, 2> Triangulator::verticalCuts(vector<Node*> vertices, bool vertical
     array<Edge*, 2> rightD = verticalCuts(right_half, vertical);
 
     Edge *ldo, *rdo,* basel;
-    compute_state(leftD, rightD, vertical, ldo, rdo, basel, true);
+    compute_state(leftD, rightD, vertical, ldo, rdo, basel);
 
     basel = mergeLoop(basel, vertical);
 
@@ -195,7 +195,7 @@ array<Edge*, 2> Triangulator::verticalCuts(vector<Node*> vertices, bool vertical
 array<Edge*, 2> Triangulator::alternatingCuts(vector<Node*> vertices, bool vertical){
   array<Edge*, 2> edges;
   if (vertices.size() <= 3){
-    baseCases(vertices, vertical, edges, true);
+    baseCases(vertices, vertical, edges);
   }
   else{
     vertical = !vertical;
@@ -212,7 +212,7 @@ array<Edge*, 2> Triangulator::alternatingCuts(vector<Node*> vertices, bool verti
     array<Edge*, 2> rightD = verticalCuts(right_half, vertical);
 
     Edge *ldo, *rdo,* basel;
-    compute_state(leftD, rightD, vertical, ldo, rdo, basel, true);
+    compute_state(leftD, rightD, vertical, ldo, rdo, basel);
 
     basel = mergeLoop(basel, vertical);
 
@@ -245,66 +245,13 @@ array<Edge*, 2> Triangulator::alternatingCuts(vector<Node*> vertices, bool verti
   return edges;
 };
 
-// AlternationState Triangulator::alternatingCuts(vector<Node*> vertices, bool vertical){
-//   AlternationState state;
-//
-//   // array<Edge*, 2> edges2;
-//   if (vertices.size() <= 3){
-//     baseCases(vertices, vertical, state.vEdges, true);
-//     baseCases(vertices, !vertical, state.hEdges, false);
-//   }
-//   else{
-//     vertical = !vertical;
-//     /// Split in half with vertical cut
-//
-//     auto less_than = vertical ? &less_than_xy : &less_than_flipped;
-//     kthSmallest(vertices, 0, vertices.size() - 1, vertices.size()/2, less_than);
-//
-//     vector<Node*> left_half(vertices.begin(),
-//                             vertices.begin() + vertices.size() / 2);
-//     vector<Node*> right_half(vertices.begin() + vertices.size() / 2,
-//                              vertices.end());
-//
-//     AlternationState leftState = alternatingCuts(left_half, vertical);
-//     AlternationState rightState = alternatingCuts(right_half, vertical);
-//
-//     auto leftD = vertical ? leftState.vEdges : leftState.hEdges;
-//     auto rightD = vertical ? rightState.vEdges : rightState.hEdges;
-//
-//     Edge *ldo, *rdo,* basel;
-//     compute_state(leftD, rightD, vertical, ldo, rdo, basel, true);
-//
-//     basel = mergeLoop(basel, vertical);
-//
-//     Edge *ldo2, *rdo2,* basel2;
-//     auto leftD2 = !vertical ? leftState.vEdges : leftState.hEdges;
-//     auto rightD2 = !vertical ? rightState.vEdges : rightState.hEdges;
-//     compute_state(leftD2, rightD2, !vertical, ldo2, rdo2, basel2, false);
-//
-//     cout << "basel " << basel->org()->getID() << " " << basel->dest()->getID() << endl;
-//     cout << "ldo " << ldo->org()->getID() << " " << ldo->dest()->getID() << endl;
-//     cout << "rdo " << ldo->org()->getID() << " " << rdo->dest()->getID() << endl;
-//
-//
-//     cout << "basel2 " << basel2->org()->getID() << " " << basel2->dest()->getID() << endl;
-//     cout << "ldo2 " << ldo2->org()->getID() << " " << ldo2->dest()->getID() << endl;
-//     cout << "rdo2 " << ldo2->org()->getID() << " " << rdo2->dest()->getID() << endl;
-//
-//     state.vEdges[0] = vertical ? ldo : ldo2;
-//     state.vEdges[1] = vertical ? rdo : rdo2;
-//     state.hEdges[0] = vertical ? ldo2 : ldo;
-//     state.hEdges[1] = vertical ? rdo2 : rdo;
-//   }
-//   return state;
-// };
-
-
 
 bool Triangulator::valid(Edge* edge, Edge* basel, bool vertical){
   return (orient2d(edge->dest()->getPosition(vertical),
                   basel->dest()->getPosition(vertical),
                   basel->org()->getPosition(vertical)) > 0);
 };
+
 
 Edge* Triangulator::mergeLoop(Edge* basel, bool vertical){
   /// Merge loop
