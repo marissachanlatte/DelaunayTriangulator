@@ -40,21 +40,21 @@ vector<double*> Sites::getPositions(bool vertical){
   return positions;
 };
 
-// vector<Node*> Sites::sortNodes(vector<Node*> nodes){
-//   vector<array<double, 3>>  positions_and_ids;
-//   for(auto &node : nodes){
-//     array<double, 3> pid  = {node->getPosition()[0],
-//                              node->getPosition()[1],
-//                              (double) node->getID()};
-//     positions_and_ids.push_back(pid);
-//   }
-//   sort(positions_and_ids.begin(), positions_and_ids.end());
-//   vector<Node*> sorted_ids;
-//   for(auto &ids : positions_and_ids){
-//     sorted_ids.push_back(this->findNode(int(ids[2])));
-//   }
-//   return sorted_ids;
-// };
+vector<Node*> Sites::sortNodes(vector<Node*> nodes, bool vertical){
+  vector<array<double, 3>>  positions_and_ids;
+  for(auto &node : nodes){
+    array<double, 3> pid  = {node->getPosition(vertical)[0],
+                             node->getPosition(vertical)[1],
+                             (double) node->getID()};
+    positions_and_ids.push_back(pid);
+  }
+  sort(positions_and_ids.begin(), positions_and_ids.end());
+  vector<Node*> sorted_ids;
+  for(auto &ids : positions_and_ids){
+    sorted_ids.push_back(this->findNode(int(ids[2])));
+  }
+  return sorted_ids;
+};
 
 vector<Node*> Sites::getNodes(){
   return m_nodes;

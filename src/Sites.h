@@ -12,7 +12,7 @@ class Sites{
     Sites(const string& nodeFile);
     int numNodes();
     vector<double*> getPositions(bool vertical);
-    // vector<Node*> sortNodes(vector<Node*> nodes);
+    vector<Node*> sortNodes(vector<Node*> nodes, bool vertical);
     vector<Node*> getNodes();
     Node* findNode(const int id);
 
