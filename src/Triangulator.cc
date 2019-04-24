@@ -34,7 +34,7 @@ Triangulator::Triangulator(Sites problem_sites, unsigned int alg_number){
   vector<Node*> nodes = sites.getNodes();
   if (alg_number == 1){
     array<Edge*, 2> edges;
-    edges = verticalCuts(nodes, false);
+    edges = verticalCuts(nodes, true);
     computeTriangles(edges[0]);
   }
   else if (alg_number == 2){
@@ -185,9 +185,6 @@ array<Edge*, 2> Triangulator::verticalCuts(vector<Node*> vertices, bool vertical
     compute_state(leftD, rightD, vertical, ldo, rdo, basel, true);
 
     basel = mergeLoop(basel, vertical);
-
-    Edge *ldo2, *rdo2,* basel2;
-    compute_state(leftD, rightD, vertical, ldo2, rdo2, basel2, false);
 
     edges[0] = ldo;
     edges[1] = rdo;
