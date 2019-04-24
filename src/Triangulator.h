@@ -13,12 +13,6 @@ extern "C" {
 
 using namespace std;
 
-// typedef struct AlternationState {
-//   array<Edge*, 2> vEdges;
-//   array<Edge*, 2> hEdges;
-// } AlternationState;
-
-
 class Triangulator{
   public:
     Triangulator(Sites problem_sites, unsigned int alg_number);

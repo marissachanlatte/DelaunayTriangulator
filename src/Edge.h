@@ -29,7 +29,7 @@ class Edge{
     void splice(Edge *b);
     Edge* connect(Edge *b);
     /// last global edge id used
-    static unsigned int lastID;
+    static int lastID;
   private:
     Node *m_origin;
     Edge *m_next;

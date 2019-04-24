@@ -141,4 +141,4 @@ void Edge::setID(unsigned int id){
   m_id = id;
 };
 
-unsigned int Edge::lastID = -1;
+int Edge::lastID = -1;

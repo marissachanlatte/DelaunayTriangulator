@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <iterator>
 #include <array>
+#include <ctime>
 
 using namespace std;
 
@@ -23,25 +24,26 @@ bool less_than_yx(Node* x, Node* y){
   return point1 <= point2;
 }
 
-// bool less_than_flipped(Node* x, Node* y){
-//   array<double, 2> point1 = {x->getPosition(true)[1], -(x->getPosition(true)[0])};
-//   array<double, 2> point2 = {y->getPosition(true)[1], -(y->getPosition(true)[0])};
-//   return point1 <= point2;
-// }
-
 Triangulator::Triangulator(Sites problem_sites, unsigned int alg_number){
   sites = problem_sites;
   vector<Node*> nodes = sites.getNodes();
-  if (alg_number == 1){
-    array<Edge*, 2> edges;
-    edges = verticalCuts(nodes, true);
-    computeTriangles(edges[0]);
-  }
-  else if (alg_number == 2){
-    array<Edge*, 2> edges;
-    edges = alternatingCuts(nodes, false);
-    computeTriangles(edges[0]);
-  }
+  array<Edge*, 2> edges;
+
+  // Set Up Timer
+  clock_t start;
+  double duration;
+  start = clock();
+
+  // Run Algorithm
+  if (alg_number == 1){edges = verticalCuts(nodes, true);}
+  else if (alg_number == 2){edges = alternatingCuts(nodes, false);}
+
+  // Calculate duration
+  duration = (clock() - start) / (double) CLOCKS_PER_SEC;
+  cout<< "Runtime: " << duration << " seconds." << endl;;
+
+  // Prepare triangles for output
+  computeTriangles(edges[0]);
 };
 
 void compute_state(array<Edge*, 2> leftD, array<Edge*, 2> rightD, bool vertical,
@@ -122,25 +124,18 @@ void Triangulator::baseCases(vector<Node*> &vertices,
 void Triangulator::computeTriangles(Edge* le){
   vector<Edge*> stack;
   vector<vector<Edge*>> visited;
+  bool visited_bool[Edge::lastID + 1];
+  fill(visited_bool, visited_bool + Edge::lastID + 1, false);
 
   /// Initialize stack and current
   stack.push_back(le);
 
   while(stack.size() > 0){
-    bool vis_bool = false;
     /// Pop off of stack to current
     Edge* curr_edge = stack.back();
     stack.pop_back();
     /// Check if visited (if visited repeat above)
-    for (auto const& face: visited){
-      if(find(face.begin(), face.end(), curr_edge) != face.end()){
-        vis_bool = true;
-        break;
-      }
-    }
-    if (vis_bool){
-      continue;
-    }
+    if (visited_bool[curr_edge->getID()]) {continue;}
     vector<Edge*> curr_face;
     curr_face.push_back(curr_edge);
     stack.push_back(curr_edge->sym());
@@ -153,6 +148,8 @@ void Triangulator::computeTriangles(Edge* le){
     }
     /// Add inside edges to visited
     visited.push_back(curr_face);
+    /// Update boolean array
+    visited_bool[curr_edge->getID()] = true;
   }
   /// Convert from edges to triangles
   for (auto const& face: visited){
