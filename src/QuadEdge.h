@@ -1,8 +1,6 @@
 #include <array>
 #include "Edge.h"
 
-using namespace std;
-
 class QuadEdge{
   public:
     QuadEdge();

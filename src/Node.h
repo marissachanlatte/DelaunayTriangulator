@@ -2,7 +2,6 @@
 #define _NODE_H_
 #include <utility>
 #include "Edge.h"
-using namespace std;
 
 class Edge;
 

@@ -3,22 +3,20 @@
 #include <vector>
 #include "Node.h"
 
-using namespace std;
-
 class Sites{
   public:
     Sites();
     /// Constructor by reading from file
-    Sites(const string& nodeFile);
+    Sites(const std::string& nodeFile);
     int numNodes();
-    vector<double*> getPositions(bool vertical);
-    vector<Node*> sortNodes(vector<Node*> nodes, bool vertical);
-    vector<Node*> getNodes();
+    std::vector<double*> getPositions(bool vertical);
+    std::vector<Node*> sortNodes(std::vector<Node*> nodes, bool vertical);
+    std::vector<Node*> getNodes();
     Node* findNode(const int id);
 
   private:
     unsigned int m_numNodes;
-    vector<Node*> m_nodes;
+    std::vector<Node*> m_nodes;
 
 };
 #endif

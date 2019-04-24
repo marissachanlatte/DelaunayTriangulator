@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
